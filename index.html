@@ -167,10 +167,13 @@
         padding: 1rem;
       }
 
+      /* 修正: グリッドのカラム定義を変更 */
+      /* [射位] [名前] [内訳スコア] [個人計] */
       .member-row {
         display: grid;
-        grid-template-columns: 30px 1fr 40px;
-        padding: 0.5rem 0;
+        grid-template-columns: 30px 1fr 80px 30px; /* 内訳用に幅を確保 */
+        gap: 5px;
+        padding: 0.6rem 0;
         border-bottom: 1px dashed #eee;
         align-items: center;
       }
@@ -186,6 +189,8 @@
         border-radius: 4px;
         text-align: center;
         padding: 2px 0;
+        height: 20px;
+        line-height: 20px;
       }
 
       .pos-1 {
@@ -199,8 +204,11 @@
       } /* Ochi */
 
       .player-name {
-        padding-left: 0.8rem;
         font-size: 0.95rem;
+        /* 名前が長い場合に省略記号(...)を出す処理 */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .player-score {
@@ -344,10 +352,8 @@
       // チームカードのHTMLを生成する関数
       function createTeamCard(team) {
         try {
-          // 上位3位には特別なクラスを付与
           const rankClass = team.rank <= 3 ? `rank-${team.rank}` : '';
 
-          // メンバーリストの生成
           const membersHtml = team.members
             .map(
               (member) => `
@@ -355,8 +361,16 @@
                     <span class="position ${
                       member.posClass
                     }">${member.position.charAt(0)}</span>
+
                     <span class="player-name">${member.name}</span>
-                    <span class="player-score">${member.score}中</span>
+
+                    <span class="score-details">
+                        ${member.details.s1}-${member.details.s2}-${
+                member.details.s3
+              }
+                    </span>
+
+                    <span class="player-score">${member.score}</span>
                 </div>
             `
             )
@@ -376,7 +390,7 @@
             `;
         } catch (e) {
           logError('Card creation failed for team', team);
-          return ''; // エラー時は空文字を返し、画面全体を壊さない
+          return '';
         }
       }
 
