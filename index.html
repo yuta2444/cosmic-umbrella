@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>第4回めんたいこ杯争奪弓道大会 - 団体戦速報</title>
+    <style>
+      /* --- CSS Reset & Variables --- */
+      :root {
+        --primary-color: #1a237e; /* 藍色（伝統・格式） */
+        --accent-color: #b71c1c; /* 朱色（的・情熱） */
+        --bg-color: #f5f5f5; /* 背景（和紙っぽい白） */
+        --text-color: #333;
+        --white: #ffffff;
+        --gray: #757575;
+        --font-main: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN',
+          'Hiragino Sans', Meiryo, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-main);
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+
+      /* --- Header --- */
+      header {
+        background-color: var(--primary-color);
+        color: var(--white);
+        padding: 1.5rem 1rem;
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.05em;
+      }
+
+      header p {
+        font-size: 0.9rem;
+        opacity: 0.9;
+      }
+
+      /* --- Main Layout --- */
+      main {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      /* --- Filter/Search Area (Future expansion) --- */
+      .controls {
+        margin-bottom: 2rem;
+        text-align: right;
+      }
+
+      .status-badge {
+        display: inline-block;
+        background: var(--accent-color);
+        color: white;
+        padding: 0.25rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: bold;
+      }
+
+      /* --- Team Cards Grid --- */
+      .ranking-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 1.5rem;
+      }
+
+      /* --- Card Design --- */
+      .team-card {
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-top: 4px solid var(--primary-color);
+      }
+
+      .team-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Top 3 Highlighting */
+      .rank-1 {
+        border-top-color: #ffd700;
+        border-width: 6px;
+      } /* Gold */
+      .rank-2 {
+        border-top-color: #c0c0c0;
+        border-width: 6px;
+      } /* Silver */
+      .rank-3 {
+        border-top-color: #cd7f32;
+        border-width: 6px;
+      } /* Bronze */
+
+      .card-header {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .rank-badge {
+        background: #333;
+        color: #fff;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+
+      .rank-1 .rank-badge {
+        background: #ffd700;
+        color: #333;
+      }
+      .rank-2 .rank-badge {
+        background: #c0c0c0;
+        color: #333;
+      }
+      .rank-3 .rank-badge {
+        background: #cd7f32;
+        color: #fff;
+      }
+
+      .team-name {
+        font-size: 1.1rem;
+        font-weight: bold;
+        flex-grow: 1;
+        margin-left: 0.8rem;
+      }
+
+      .team-total {
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: var(--accent-color);
+      }
+
+      .team-total span {
+        font-size: 0.8rem;
+        color: var(--gray);
+        font-weight: normal;
+      }
+
+      /* Members List */
+      .members-list {
+        padding: 1rem;
+      }
+
+      .member-row {
+        display: grid;
+        grid-template-columns: 30px 1fr 40px;
+        padding: 0.5rem 0;
+        border-bottom: 1px dashed #eee;
+        align-items: center;
+      }
+
+      .member-row:last-child {
+        border-bottom: none;
+      }
+
+      .position {
+        font-size: 0.75rem;
+        color: var(--white);
+        background-color: var(--gray);
+        border-radius: 4px;
+        text-align: center;
+        padding: 2px 0;
+      }
+
+      .pos-1 {
+        background-color: #5c6bc0;
+      } /* Omae */
+      .pos-2 {
+        background-color: #7e57c2;
+      } /* Naka */
+      .pos-3 {
+        background-color: #ef5350;
+      } /* Ochi */
+
+      .player-name {
+        padding-left: 0.8rem;
+        font-size: 0.95rem;
+      }
+
+      .player-score {
+        font-weight: bold;
+        text-align: right;
+      }
+
+      /* --- Footer --- */
+      footer {
+        text-align: center;
+        padding: 2rem;
+        color: var(--gray);
+        font-size: 0.8rem;
+        margin-top: 3rem;
+        border-top: 1px solid #ddd;
+      }
+
+      /* --- Loading / Error States --- */
+      #loading,
+      #error-msg {
+        text-align: center;
+        padding: 3rem;
+        font-weight: bold;
+        color: var(--gray);
+      }
+      #error-msg {
+        color: var(--accent-color);
+        display: none;
+      }
+
+      /* --- Mobile Optimization --- */
+      @media (max-width: 600px) {
+        .ranking-grid {
+          grid-template-columns: 1fr; /* Full width cards on mobile */
+        }
+        header h1 {
+          font-size: 1.2rem;
+        }
+        .team-total {
+          font-size: 1.2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>第4回めんたいこ杯争奪弓道大会</h1>
+      <p>団体戦 リアルタイム速報</p>
+    </header>
+
+    <main>
+      <div class="controls">
+        <span class="status-badge">競技進行中</span>
+        <span style="margin-left: 10px; font-size: 0.9rem"
+          >最終更新: <span id="last-updated">--:--</span></span
+        >
+      </div>
+
+      <div id="loading">データを読み込んでいます...</div>
+      <div id="error-msg">データの取得に失敗しました。</div>
+
+      <div id="app" class="ranking-grid" style="display: none"></div>
+    </main>
+
+    <footer>&copy; 2025 Mentai-ko Cup Committee. All rights reserved.</footer>
+
+    <script>
+      /**
+       * Mock Data: 本来はスプレッドシート(JSON)から取得するデータ構造
+       * UI/UX: 3人1組のデータ構造に整形済みと仮定
+       */
+      const mockData = [
+        {
+          rank: 1,
+          teamName: '博多弓道クラブA',
+          totalScore: 28,
+          members: [
+            {
+              position: '大前',
+              posClass: 'pos-1',
+              name: '佐藤 健一',
+              score: 10,
+            },
+            { position: '中', posClass: 'pos-2', name: '鈴木 雅之', score: 9 },
+            { position: '落', posClass: 'pos-3', name: '高橋 徹', score: 9 },
+          ],
+        },
+        {
+          rank: 2,
+          teamName: '天神実業高校',
+          totalScore: 25,
+          members: [
+            {
+              position: '大前',
+              posClass: 'pos-1',
+              name: '田中 優子',
+              score: 8,
+            },
+            { position: '中', posClass: 'pos-2', name: '山本 香織', score: 8 },
+            { position: '落', posClass: 'pos-3', name: '中村 晋', score: 9 },
+          ],
+        },
+        {
+          rank: 3,
+          teamName: '中洲産業大学',
+          totalScore: 22,
+          members: [
+            {
+              position: '大前',
+              posClass: 'pos-1',
+              name: '鬼瓦 権造',
+              score: 6,
+            },
+            {
+              position: '中',
+              posClass: 'pos-2',
+              name: '明太子 太郎',
+              score: 8,
+            },
+            { position: '落', posClass: 'pos-3', name: '博多 花子', score: 8 },
+          ],
+        },
+        {
+          rank: 4,
+          teamName: '春日市民弓道場',
+          totalScore: 18,
+          members: [
+            { position: '大前', posClass: 'pos-1', name: '西郷 隆', score: 5 },
+            { position: '中', posClass: 'pos-2', name: '大久保 利', score: 6 },
+            { position: '落', posClass: 'pos-3', name: '木戸 孝', score: 7 },
+          ],
+        },
+      ];
+
+      // エラーログを収集するためのラッパー関数
+      function logError(message, details = null) {
+        console.error(`[Tournament App Error]: ${message}`, details);
+        // 必要であればここに管理者に通知を送る処理を追加可能
+      }
+
+      // チームカードのHTMLを生成する関数
+      function createTeamCard(team) {
+        try {
+          // 上位3位には特別なクラスを付与
+          const rankClass = team.rank <= 3 ? `rank-${team.rank}` : '';
+
+          // メンバーリストの生成
+          const membersHtml = team.members
+            .map(
+              (member) => `
+                <div class="member-row">
+                    <span class="position ${
+                      member.posClass
+                    }">${member.position.charAt(0)}</span>
+                    <span class="player-name">${member.name}</span>
+                    <span class="player-score">${member.score}中</span>
+                </div>
+            `
+            )
+            .join('');
+
+          return `
+                <article class="team-card ${rankClass}">
+                    <div class="card-header">
+                        <div class="rank-badge">${team.rank}</div>
+                        <div class="team-name">${team.teamName}</div>
+                        <div class="team-total">${team.totalScore}<span>中</span></div>
+                    </div>
+                    <div class="members-list">
+                        ${membersHtml}
+                    </div>
+                </article>
+            `;
+        } catch (e) {
+          logError('Card creation failed for team', team);
+          return ''; // エラー時は空文字を返し、画面全体を壊さない
+        }
+      }
+
+      // メイン描画処理
+      async function initApp() {
+        const appContainer = document.getElementById('app');
+        const loadingEl = document.getElementById('loading');
+        const errorEl = document.getElementById('error-msg');
+        const lastUpdatedEl = document.getElementById('last-updated');
+
+        // ★ここにGASのウェブアプリURLを貼り付けてください
+        const API_URL =
+          'https://script.google.com/macros/s/AKfycbxM8Bfr9i8uQVFp0NSjluD3pIRyDgS1Yi999rGG30dmiz6zUyMeGkzF41XefC6cQQ1XQA/exec';
+
+        try {
+          // STEP 1: データ取得 (GAS APIへリクエスト)
+          const response = await fetch(API_URL, {
+            method: 'GET',
+            mode: 'cors', // CORS通信であることを明示
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8',
+            },
+            redirect: 'follow', // GASのリダイレクト（302）を追跡する
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const json = await response.json();
+
+          // GAS側でエラーが起きている場合のチェック
+          if (json.status === 'error') {
+            throw new Error(json.error || 'Server side error occurred');
+          }
+
+          const data = json.data;
+
+          // データが空の場合のチェック
+          if (!data || data.length === 0) {
+            throw new Error('現在、表示できるデータがありません');
+          }
+
+          // STEP 2: HTML生成
+          const cardsHtml = data.map((team) => createTeamCard(team)).join('');
+
+          // STEP 3: DOM更新
+          appContainer.innerHTML = cardsHtml;
+
+          // 更新時刻のセット（GASから返ってきた時刻を使用）
+          lastUpdatedEl.textContent = json.lastUpdate || '--:--';
+
+          // 表示切り替え
+          loadingEl.style.display = 'none';
+          appContainer.style.display = 'grid';
+        } catch (error) {
+          logError('Initialization failed', error);
+          loadingEl.style.display = 'none';
+          errorEl.style.display = 'block';
+          errorEl.textContent = `読み込みエラー: ${error.message}`; // ユーザーに見せるメッセージ
+        }
+      }
+
+      // DOM読み込み完了後に実行
+      document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+  </body>
+</html>
