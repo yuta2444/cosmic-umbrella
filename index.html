@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>めんたいカップ - 団体戦速報</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
     <style>
       /* --- CSS Reset & Variables (OKLCH版：アイスランド・パレット) --- */
       :root {
@@ -31,8 +37,8 @@
         /* サブテキスト：霧のようなグレー */
         --gray: oklch(55% 0.02 240);
 
-        --font-main: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN',
-          'Hiragino Sans', Meiryo, sans-serif;
+        --font-main: 'Zen Maru Gothic', 'Helvetica Neue', Arial,
+          'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
       }
 
       * {
@@ -287,7 +293,7 @@
   </head>
   <body>
     <header>
-      <h1>めんたいカップ</h1>
+      <h1>めんたいカップ ２０２６</h1>
       <p>リアルタイム速報</p>
     </header>
 
@@ -376,7 +382,6 @@
         const errorEl = document.getElementById('error-msg');
         const lastUpdatedEl = document.getElementById('last-updated');
 
-        // ★ここにGASのウェブアプリURLを貼り付けてください
         const API_URL =
           'https://script.google.com/macros/s/AKfycbxM8Bfr9i8uQVFp0NSjluD3pIRyDgS1Yi999rGG30dmiz6zUyMeGkzF41XefC6cQQ1XQA/exec';
 
@@ -400,6 +405,21 @@
           // GAS側でエラーが起きている場合のチェック
           if (json.status === 'error') {
             throw new Error(json.error || 'Server side error occurred');
+          }
+
+          // HTML内の .status-badge クラスを持つ要素を探して書き換える
+          const badgeEl = document.querySelector('.status-badge');
+          if (badgeEl && json.tournamentStatus) {
+            badgeEl.textContent = json.tournamentStatus;
+
+            // オマケ：ステータスによって色を変える（任意）
+            if (json.tournamentStatus.includes('終了')) {
+              badgeEl.style.backgroundColor = 'var(--gray)'; // 終了ならグレー
+            } else if (json.tournamentStatus.includes('休憩')) {
+              badgeEl.style.backgroundColor = '#eebb00'; // 休憩なら黄色
+            } else {
+              badgeEl.style.backgroundColor = 'var(--accent-color)'; // それ以外(進行中)は赤
+            }
           }
 
           const data = json.data;
