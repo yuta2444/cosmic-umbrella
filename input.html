@@ -3,13 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>チーム成績入力 - 第4回めんたいこ杯</title>
+    <title>成績・進行管理 - 第4回めんたいこ杯</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700;900&display=swap"
       rel="stylesheet"
     />
+
     <style>
       /* --- CSS Reset & Variables (OKLCH Ice Theme) --- */
       :root {
@@ -19,8 +21,7 @@
         --white: oklch(98% 0.005 80);
         --text-color: oklch(30% 0.02 240);
         --gray: oklch(65% 0.02 240);
-        --font-main: 'Zen Maru Gothic', 'Helvetica Neue', Arial,
-          'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+        --font-main: 'Zen Maru Gothic', 'Helvetica Neue', Arial, sans-serif;
       }
 
       * {
@@ -46,11 +47,13 @@
       }
       header h1 {
         font-size: 1.2rem;
+        margin: 0;
       }
 
+      /* タブのレイアウト：4つに変更 */
       .tabs {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
         background: var(--white);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       }
@@ -63,11 +66,16 @@
         border-bottom: 3px solid transparent;
         cursor: pointer;
         transition: all 0.2s;
+        font-family: var(--font-main);
+        font-size: 0.9rem;
       }
       .tab-btn.active {
         color: var(--primary-color);
         border-bottom-color: var(--primary-color);
         background: oklch(96% 0.01 185);
+      }
+      .tab-btn.settings-tab {
+        color: var(--text-color);
       }
 
       .player-list {
@@ -76,7 +84,7 @@
         padding: 0 1rem;
       }
 
-      /* チーム単位のカードスタイルに変更 */
+      /* チームカード */
       .team-card-input {
         background: var(--white);
         border-radius: 8px;
@@ -84,24 +92,14 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         overflow: hidden;
         border-left: 5px solid var(--accent-color);
-        cursor: pointer; /* クリック可能を示唆 */
+        cursor: pointer;
         transition: transform 0.1s;
       }
       .team-card-input:active {
         transform: scale(0.99);
         background: #f0f0f0;
       }
-      /* 立順バッジのデザイン */
-      .tachijun-badge {
-        display: inline-block;
-        background-color: var(--gray);
-        color: white;
-        font-size: 0.75rem;
-        padding: 2px 6px;
-        border-radius: 4px;
-        margin-right: 8px;
-        font-family: monospace; /* 数字の幅を揃える */
-      }
+
       .team-header-row {
         padding: 0.8rem 1rem;
         background: rgba(0, 0, 0, 0.02);
@@ -110,6 +108,16 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+      }
+      .tachijun-badge {
+        display: inline-block;
+        background-color: var(--gray);
+        color: white;
+        font-size: 0.75rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-right: 8px;
+        font-family: monospace;
       }
       .edit-icon {
         font-size: 0.8rem;
@@ -163,7 +171,45 @@
         color: #ccc;
       }
 
-      /* モーダル (3人入力用) */
+      /* --- 設定画面のスタイル --- */
+      #settings-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        display: none; /* 初期状態は非表示 */
+        text-align: center;
+      }
+      .status-btn-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      .status-btn {
+        padding: 1.5rem;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border: 2px solid #ddd;
+        background: var(--white);
+        color: var(--text-color);
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: var(--font-main);
+        transition: all 0.2s;
+      }
+      .status-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      /* アクティブなステータス */
+      .status-btn.active {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        color: white;
+        box-shadow: 0 0 15px rgba(53, 92, 88, 0.4);
+      }
+
+      /* モーダル */
       .modal-overlay {
         position: fixed;
         top: 0;
@@ -204,8 +250,6 @@
         border-bottom: 2px solid #eee;
         padding-bottom: 0.5rem;
       }
-
-      /* モーダル内の各選手行 */
       .input-row {
         margin-bottom: 1.5rem;
       }
@@ -218,7 +262,6 @@
         font-size: 0.95rem;
       }
 
-      /* ボタン群 */
       .btn-group {
         display: flex;
         gap: 5px;
@@ -234,8 +277,8 @@
         font-weight: bold;
         color: var(--gray);
         cursor: pointer;
+        font-family: var(--font-main);
       }
-      /* 選択されたボタン */
       .score-select-btn.selected {
         background: var(--primary-color);
         color: white;
@@ -243,7 +286,6 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       }
 
-      /* アクションボタン */
       .modal-actions {
         margin-top: 2rem;
         display: grid;
@@ -257,6 +299,7 @@
         font-weight: bold;
         cursor: pointer;
         font-size: 1rem;
+        font-family: var(--font-main);
       }
       .btn-cancel {
         background: #eee;
@@ -267,7 +310,6 @@
         color: white;
       }
 
-      /* Loading */
       #loading-overlay {
         position: fixed;
         top: 0;
@@ -307,17 +349,42 @@
   </head>
   <body>
     <header>
-      <h1>成績入力システム</h1>
+      <h1>成績・進行管理</h1>
     </header>
 
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('s1')">1手目</button>
-      <button class="tab-btn" onclick="switchTab('s2')">午前の立</button>
-      <button class="tab-btn" onclick="switchTab('s3')">午後の立</button>
+      <button class="tab-btn" onclick="switchTab('s2')">午前</button>
+      <button class="tab-btn" onclick="switchTab('s3')">午後</button>
+      <button class="tab-btn settings-tab" onclick="switchTab('settings')">
+        ⚙️設定
+      </button>
     </div>
 
     <main id="list-container" class="player-list">
       <div style="text-align: center; padding: 2rem">読み込み中...</div>
+    </main>
+
+    <main id="settings-container">
+      <h3>大会ステータスの変更</h3>
+      <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 1rem">
+        現在の進行状況を選択してください。<br />閲覧ページ（index.html）に反映されます。
+      </p>
+
+      <div class="status-btn-grid">
+        <button class="status-btn" onclick="updateStatus('予選進行中')">
+          予選進行中
+        </button>
+        <button class="status-btn" onclick="updateStatus('昼休憩')">
+          昼休憩
+        </button>
+        <button class="status-btn" onclick="updateStatus('決勝進行中')">
+          決勝進行中
+        </button>
+        <button class="status-btn" onclick="updateStatus('大会終了')">
+          大会終了
+        </button>
+      </div>
     </main>
 
     <div id="modal" class="modal-overlay">
@@ -342,14 +409,14 @@
 
     <script>
       // ★ GASのウェブアプリURLをここに貼ってください
-      const API_URL =
-        'https://script.google.com/macros/s/AKfycbxM8Bfr9i8uQVFp0NSjluD3pIRyDgS1Yi999rGG30dmiz6zUyMeGkzF41XefC6cQQ1XQA/exec';
+      const API_URL = 'https://script.google.com/macros/s/あなたのID/exec';
 
       let allData = [];
       let currentTab = 's1';
-      let selectedTeam = null; // 選択中のチーム
-      let tempScores = {}; // 入力中のスコア一時保存用 { "選手名": 点数 }
+      let selectedTeam = null;
+      let tempScores = {};
       let authKey = '';
+      let currentStatus = ''; // 現在のステータス
 
       const tabConfig = {
         s1: { label: '1手目', max: 2 },
@@ -365,13 +432,16 @@
         try {
           const res = await fetch(API_URL);
           const json = await res.json();
+
           if (json.status === 'success') {
             allData = json.data;
-            allData.sort((a, b) => {
-              // C列の数字が小さい順に並べる
-              return (a.tachijun || 0) - (b.tachijun || 0);
-            });
+            currentStatus = json.tournamentStatus; // ステータス保持
+
+            // 立順昇順ソート
+            allData.sort((a, b) => (a.tachijun || 0) - (b.tachijun || 0));
+
             renderList();
+            highlightCurrentStatus(); // 設定画面のボタンを光らせる
           } else {
             alert('データの取得に失敗しました');
           }
@@ -382,31 +452,93 @@
         showLoading(false);
       }
 
+      // タブ切り替え
       window.switchTab = function (tabKey) {
         currentTab = tabKey;
+
+        // タブの見た目
         document
           .querySelectorAll('.tab-btn')
           .forEach((btn) => btn.classList.remove('active'));
         event.target.classList.add('active');
-        renderList();
+
+        // 表示エリアの切り替え
+        const listContainer = document.getElementById('list-container');
+        const settingsContainer = document.getElementById('settings-container');
+
+        if (tabKey === 'settings') {
+          listContainer.style.display = 'none';
+          settingsContainer.style.display = 'block';
+        } else {
+          listContainer.style.display = 'block';
+          settingsContainer.style.display = 'none';
+          renderList(); // リスト再描画
+        }
       };
 
-      // ★チーム単位でリストを表示
+      // ステータス更新処理
+      window.updateStatus = async function (newStatus) {
+        if (!authKey) {
+          alert('パスワード未入力のため変更できません。');
+          return;
+        }
+
+        if (!confirm(`ステータスを「${newStatus}」に変更しますか？`)) return;
+
+        showLoading(true, '設定を更新中...');
+
+        const payload = {
+          action: 'update_status', // ★重要: ステータス更新アクション
+          status: newStatus,
+          authKey: authKey,
+        };
+
+        try {
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          });
+          const json = await res.json();
+
+          if (json.status === 'success') {
+            currentStatus = newStatus;
+            highlightCurrentStatus();
+            alert('変更しました！');
+          } else {
+            alert('失敗しました: ' + json.message);
+          }
+        } catch (e) {
+          console.error(e);
+          alert('通信エラー');
+        }
+        showLoading(false);
+      };
+
+      // 現在のステータスのボタンをハイライト
+      function highlightCurrentStatus() {
+        const btns = document.querySelectorAll('.status-btn');
+        btns.forEach((btn) => {
+          if (btn.textContent === currentStatus) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+      }
+
+      // リスト描画
       function renderList() {
         const container = document.getElementById('list-container');
         container.innerHTML = '';
 
         allData.forEach((team) => {
-          // チームカードを作成
           const card = document.createElement('div');
           card.className = 'team-card-input';
 
-          // チーム名ヘッダー
           const header = document.createElement('div');
           header.className = 'team-header-row';
 
-          // ★修正：立順バッジを追加
-          // 立順データがない場合は「-」にする
           const tachijunNum = team.tachijun || '-';
 
           header.innerHTML = `
@@ -418,11 +550,9 @@
             `;
           card.appendChild(header);
 
-          // メンバー行（表示のみ）
           team.members.forEach((member) => {
             let score = member.details[currentTab];
             if (score === null || score === '') score = '-';
-
             const scoreClass = score === '-' ? 'empty' : '';
             const displayScore = score === '-' ? '未' : `${score}中`;
 
@@ -440,43 +570,36 @@
             card.appendChild(row);
           });
 
-          // カード全体をクリックしたらモーダルを開く
           card.onclick = () => openTeamModal(team);
           container.appendChild(card);
         });
       }
 
-      // ★3人入力用モーダルを開く
+      // モーダルオープン
       function openTeamModal(team) {
         selectedTeam = team;
-        tempScores = {}; // リセット
+        tempScores = {};
 
-        // 1. タイトル設定（立順がある場合は表示）
         const tachijunText = team.tachijun ? `[立順:${team.tachijun}] ` : '';
         document.getElementById(
           'modal-team-name'
         ).textContent = `${tachijunText}${team.teamName} (${tabConfig[currentTab].label})`;
 
-        // 2. ★ここが消えていました！入力欄を入れる親要素を取得
         const container = document.getElementById('modal-inputs-container');
-        container.innerHTML = ''; // 中身をクリア
+        container.innerHTML = '';
 
         const maxScore = tabConfig[currentTab].max;
 
-        // 3. メンバーごとにループして入力欄を作る
         team.members.forEach((member) => {
-          // 現在のスコアを取得（初期値）
           let currentVal = member.details[currentTab];
           if (currentVal === '-' || currentVal === '') currentVal = null;
           else currentVal = Number(currentVal);
 
-          // 一時保存にもセット
           tempScores[member.name] = currentVal;
 
           const wrapper = document.createElement('div');
           wrapper.className = 'input-row';
 
-          // 名前ラベル
           const label = document.createElement('div');
           label.className = 'input-label';
           label.innerHTML = `<span class="p-pos ${
@@ -484,67 +607,48 @@
           }">${member.position.charAt(0)}</span> ${member.name}`;
           wrapper.appendChild(label);
 
-          // ボタン群
           const btnGroup = document.createElement('div');
           btnGroup.className = 'btn-group';
 
           for (let i = 0; i <= maxScore; i++) {
             const btn = document.createElement('button');
             btn.className = 'score-select-btn';
-            if (currentVal === i) btn.classList.add('selected'); // 初期値選択
+            if (currentVal === i) btn.classList.add('selected');
             btn.textContent = i;
 
-            // ボタンクリック時
             btn.onclick = (e) => {
-              // 他のボタンの選択を外す
               const parent = e.target.parentNode;
               Array.from(parent.children).forEach((b) =>
                 b.classList.remove('selected')
               );
-              // 自分を選択
               e.target.classList.add('selected');
-              // スコア記録
               tempScores[member.name] = i;
             };
 
             btnGroup.appendChild(btn);
           }
           wrapper.appendChild(btnGroup);
-
-          // ★エラーが出ていたのはこの行です（containerが定義されたので動きます）
           container.appendChild(wrapper);
         });
 
         document.getElementById('modal').classList.add('open');
       }
+
       window.closeModal = function () {
         document.getElementById('modal').classList.remove('open');
         selectedTeam = null;
       };
 
-      // ★一括保存処理
+      // 成績一括保存
       async function submitTeamScores() {
-        // --- ⬇︎ 追加ここから ⬇︎ ---
-        // テスト用：送ろうとしているパスワードを画面に出す
-        console.log('現在のパスワード変数:', authKey);
-        if (!authKey) {
-          alert(
-            'エラー: パスワード変数が空です。リロードして入力し直してください。'
-          );
-          return;
-        }
-        // --- ⬆︎ 追加ここまで ⬆︎ ---
-
         if (!authKey) {
           alert('パスワード未入力のため保存できません。');
           return;
         }
 
-        // 入力されているスコアだけ抽出して送信リストを作る
         const updates = [];
         selectedTeam.members.forEach((member) => {
           const val = tempScores[member.name];
-          // null(未選択)でなければ送信対象にする
           if (val !== null && val !== undefined) {
             updates.push({
               id: selectedTeam.id,
@@ -562,9 +666,8 @@
         }
 
         showLoading(true, '保存中(0/' + updates.length + ')...');
-        closeModal(); // 先に閉じる
+        closeModal();
 
-        // ★重要: 1件ずつ順番に送信する (GASのロック競合を防ぐため)
         let successCount = 0;
         let errorOccurred = false;
 
@@ -581,7 +684,6 @@
             const json = await res.json();
 
             if (json.status === 'success') {
-              // ローカルデータ更新
               updateLocalData(
                 payload.id,
                 payload.name,
@@ -590,7 +692,7 @@
               );
               successCount++;
             } else {
-              console.error('Save failed for ' + payload.name, json.message);
+              console.error('Save failed', json.message);
               errorOccurred = true;
             }
           } catch (e) {
@@ -603,13 +705,10 @@
 
         if (errorOccurred) {
           alert(
-            `完了しましたが、いくつかのデータ保存に失敗しました。\n成功: ${successCount} / ${updates.length}\n画面を確認してください。`
+            `一部保存に失敗しました。\n成功: ${successCount} / ${updates.length}`
           );
-        } else {
-          // alert("保存しました"); // いちいち出すとウザいので省略しても良い
         }
 
-        // リスト再描画
         renderList();
       }
 
