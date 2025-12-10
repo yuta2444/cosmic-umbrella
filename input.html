@@ -400,44 +400,39 @@
         selectedPlayer = null;
       };
 
-      // スコア送信処理
+      // スコア送信処理（修正版）
       async function submitScore(score) {
+        // 1. 念のためのチェック
         if (!selectedPlayer) return;
 
-        // ★追加：パスワード未入力なら弾く
-        if (!authKey) {
-          alert(
-            'パスワードが入力されていません。リロードして入力してください。'
-          );
-          return;
-        }
-
-        showLoading(true);
-        closeModal();
-
-        // 送信データ
+        // ★修正ポイント1：モーダルを閉じる前に、送信データ(payload)を作る
+        // (閉じてしまうと selectedPlayer が null になってしまうため)
         const payload = {
           id: selectedPlayer.teamId,
           name: selectedPlayer.name,
-          target: currentTab, // s1, s2, s3
+          target: currentTab,
           score: score,
-          authKey: authKey, // ★追加：合言葉も一緒に送る
+          // もし「合言葉」機能を実装している場合は、ここに authKey: authKey を追加してください
         };
+
+        // 2. ローディング開始
+        showLoading(true);
+
+        // ★修正ポイント2：データを作り終わってから閉じる
+        closeModal();
 
         try {
           // POSTリクエスト
-          // GASへのPOSTは特殊な設定が必要
           const res = await fetch(API_URL, {
             method: 'POST',
             body: JSON.stringify(payload),
-            // CORS対策: text/plainとして送り、GAS側でJSON.parseする
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           });
 
           const json = await res.json();
 
           if (json.status === 'success') {
-            // 成功したら手元のデータを更新して再描画（リロードなしで高速化）
+            // 成功したら手元のデータを更新して再描画
             updateLocalData(payload.id, payload.name, payload.target, score);
           } else {
             alert('保存に失敗しました: ' + json.message);
@@ -446,9 +441,10 @@
           console.error(e);
           alert('送信エラー。通信環境を確認してください。');
         }
+
+        // 3. ローディング終了
         showLoading(false);
       }
-
       // ローカルデータの更新（表示用）
       function updateLocalData(tid, pname, target, val) {
         // allDataの中から該当選手を探して書き換え
