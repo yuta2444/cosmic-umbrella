@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>チーム成績入力 - 第4回めんたいこ杯</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
     <style>
       /* --- CSS Reset & Variables (OKLCH Ice Theme) --- */
       :root {
@@ -13,7 +19,8 @@
         --white: oklch(98% 0.005 80);
         --text-color: oklch(30% 0.02 240);
         --gray: oklch(65% 0.02 240);
-        --font-main: 'Helvetica Neue', Arial, sans-serif;
+        --font-main: 'Zen Maru Gothic', 'Helvetica Neue', Arial,
+          'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
       }
 
       * {
@@ -360,6 +367,10 @@
           const json = await res.json();
           if (json.status === 'success') {
             allData = json.data;
+            allData.sort((a, b) => {
+              // C列の数字が小さい順に並べる
+              return (a.tachijun || 0) - (b.tachijun || 0);
+            });
             renderList();
           } else {
             alert('データの取得に失敗しました');
@@ -440,18 +451,22 @@
         selectedTeam = team;
         tempScores = {}; // リセット
 
+        // 1. タイトル設定（立順がある場合は表示）
         const tachijunText = team.tachijun ? `[立順:${team.tachijun}] ` : '';
         document.getElementById(
           'modal-team-name'
         ).textContent = `${tachijunText}${team.teamName} (${tabConfig[currentTab].label})`;
 
+        // 2. ★ここが消えていました！入力欄を入れる親要素を取得
+        const container = document.getElementById('modal-inputs-container');
+        container.innerHTML = ''; // 中身をクリア
+
         const maxScore = tabConfig[currentTab].max;
 
-        // メンバーごとにループして入力欄を作る
+        // 3. メンバーごとにループして入力欄を作る
         team.members.forEach((member) => {
           // 現在のスコアを取得（初期値）
           let currentVal = member.details[currentTab];
-          // 数値でなければ null扱い
           if (currentVal === '-' || currentVal === '') currentVal = null;
           else currentVal = Number(currentVal);
 
@@ -495,12 +510,13 @@
             btnGroup.appendChild(btn);
           }
           wrapper.appendChild(btnGroup);
+
+          // ★エラーが出ていたのはこの行です（containerが定義されたので動きます）
           container.appendChild(wrapper);
         });
 
         document.getElementById('modal').classList.add('open');
       }
-
       window.closeModal = function () {
         document.getElementById('modal').classList.remove('open');
         selectedTeam = null;
