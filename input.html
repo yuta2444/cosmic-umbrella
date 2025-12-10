@@ -412,8 +412,7 @@
           name: selectedPlayer.name,
           target: currentTab,
           score: score,
-          // もし「合言葉」機能を実装している場合は、ここに authKey: authKey を追加してください
-        };
+          authKey: authKey  // ← ★ここが重要！この行がないと認証エラーになります};
 
         // 2. ローディング開始
         showLoading(true);
